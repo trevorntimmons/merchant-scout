@@ -1,0 +1,16 @@
+{
+  "name": "Professional Services (Medical/Dental/Legal)",
+  "google_place_types": ["dentist", "doctor", "lawyer", "physiotherapist"],
+  "avg_ticket_size": 150,
+  "card_payment_pct": 0.7,
+  "revenue_benchmark": [
+    {"max_reviews": 30, "annual_revenue": 400000},
+    {"max_reviews": 120, "annual_revenue": 900000},
+    {"max_reviews": 999999, "annual_revenue": 2000000}
+  ],
+  "pos_keywords": ["square", "clover", "simplepractice"],
+  "pain_keywords": [
+    "billing issue", "card declined", "payment system", "couldn't process payment",
+    "front desk"
+  ]
+}

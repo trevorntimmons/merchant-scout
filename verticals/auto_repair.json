@@ -1,0 +1,16 @@
+{
+  "name": "Auto Repair & Service",
+  "google_place_types": ["car_repair"],
+  "avg_ticket_size": 320,
+  "card_payment_pct": 0.75,
+  "revenue_benchmark": [
+    {"max_reviews": 40, "annual_revenue": 400000},
+    {"max_reviews": 150, "annual_revenue": 900000},
+    {"max_reviews": 999999, "annual_revenue": 1800000}
+  ],
+  "pos_keywords": ["square", "clover", "shopmonkey", "mitchell1"],
+  "pain_keywords": [
+    "card declined", "cash only", "couldn't process card", "system was down",
+    "card machine broken"
+  ]
+}

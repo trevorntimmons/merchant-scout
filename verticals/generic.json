@@ -1,0 +1,16 @@
+{
+  "name": "Generic / Other",
+  "google_place_types": ["store", "establishment"],
+  "avg_ticket_size": 45,
+  "card_payment_pct": 0.8,
+  "revenue_benchmark": [
+    {"max_reviews": 40, "annual_revenue": 300000},
+    {"max_reviews": 150, "annual_revenue": 600000},
+    {"max_reviews": 999999, "annual_revenue": 1200000}
+  ],
+  "pos_keywords": ["square", "clover", "toast", "shopify"],
+  "pain_keywords": [
+    "card declined", "cash only", "system was down", "couldn't process",
+    "card machine"
+  ]
+}

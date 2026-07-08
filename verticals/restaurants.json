@@ -1,0 +1,17 @@
+{
+  "name": "Restaurants & Cafes",
+  "google_place_types": ["restaurant", "cafe", "bar", "meal_takeaway"],
+  "avg_ticket_size": 28,
+  "card_payment_pct": 0.85,
+  "revenue_benchmark": [
+    {"max_reviews": 50, "annual_revenue": 350000},
+    {"max_reviews": 200, "annual_revenue": 750000},
+    {"max_reviews": 999999, "annual_revenue": 1500000}
+  ],
+  "pos_keywords": ["square", "toast", "clover", "aloha", "micros", "lightspeed"],
+  "pain_keywords": [
+    "card declined", "card didn't work", "cash only", "system was down",
+    "machine was down", "couldn't process", "card machine", "point of sale",
+    "checkout took forever", "long wait to pay"
+  ]
+}

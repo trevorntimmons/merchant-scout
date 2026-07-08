@@ -1,0 +1,16 @@
+{
+  "name": "Salons & Spas",
+  "google_place_types": ["hair_care", "beauty_salon", "spa"],
+  "avg_ticket_size": 75,
+  "card_payment_pct": 0.8,
+  "revenue_benchmark": [
+    {"max_reviews": 40, "annual_revenue": 200000},
+    {"max_reviews": 150, "annual_revenue": 450000},
+    {"max_reviews": 999999, "annual_revenue": 900000}
+  ],
+  "pos_keywords": ["square", "vagaro", "clover", "fresha", "mindbody"],
+  "pain_keywords": [
+    "card declined", "cash only", "couldn't pay", "booking system",
+    "card machine", "system was down"
+  ]
+}

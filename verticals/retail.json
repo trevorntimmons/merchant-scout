@@ -1,0 +1,16 @@
+{
+  "name": "Retail & Boutique",
+  "google_place_types": ["clothing_store", "shoe_store", "jewelry_store", "store"],
+  "avg_ticket_size": 55,
+  "card_payment_pct": 0.9,
+  "revenue_benchmark": [
+    {"max_reviews": 30, "annual_revenue": 300000},
+    {"max_reviews": 150, "annual_revenue": 650000},
+    {"max_reviews": 999999, "annual_revenue": 1200000}
+  ],
+  "pos_keywords": ["square", "clover", "shopify", "lightspeed", "vend"],
+  "pain_keywords": [
+    "card declined", "cash only", "system down", "couldn't check out",
+    "register was down", "card reader"
+  ]
+}

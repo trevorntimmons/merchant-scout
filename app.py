@@ -4,6 +4,8 @@ Same underlying pipeline (search -> enrich -> score -> rank), two renderings:
 - BDR/SDR view: sortable call list.
 - Field Rep view: map + downloadable route file.
 """
+import math
+
 import pandas as pd
 import streamlit as st
 
@@ -19,12 +21,54 @@ from core.scoring import score_merchant
 from core.tpv import estimate_revenue, estimate_tpv
 from core.vertical_configs import list_verticals, load_vertical
 
+
 st.set_page_config(page_title="MerchantScout", layout="wide")
+
+
+def _haversine_miles(lat1, lng1, lat2, lng2):
+    """Great-circle distance in miles between two lat/lng points."""
+    r = 3958.8  # Earth radius in miles
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lng2 - lng1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlambda / 2) ** 2
+    return 2 * r * math.asin(math.sqrt(a))
+
 
 st.title("MerchantScout")
 st.caption(
     "Find, grade, and prioritize merchant prospects for POS and payment-processing outreach."
 )
+
+with st.expander("How merchants are scored", expanded=False):
+    st.markdown(
+        "**Every merchant starts at a baseline of 10**, then earns points for "
+        "buying-intent signals. The score measures *how urgent an opportunity* a "
+        "merchant is — not how big the business is."
+    )
+    st.table({
+        "Signal": [
+            "Baseline",
+            "No website found",
+            "Payment-friction in reviews",
+            "Competitor POS named in reviews",
+            "Below-average rating (+ volume)",
+            "Newly opened business",
+        ],
+        "Points": ["10", "+20", "+7 to +20", "+10", "+10", "+25"],
+        "Why it matters": [
+            "Starting floor — no merchant scores below this",
+            "Likely no online ordering/payment presence yet",
+            "Customers mention checkout pain — a live angle to lead with",
+            "Reveals current setup — a conversation starter, not a confirmed contract",
+            "Rating under 3.5 with 20+ reviews — operational friction proxy",
+            "Registry match or first review within 12 months — still shopping",
+        ],
+    })
+    st.caption(
+        "Scores are additive and capped at 100. A low score isn't a bad business — "
+        "it means the merchant shows no urgent switching signals right now."
+    )
 
 mode = st.sidebar.radio("View", ["BDR / SDR (call list)", "Field Rep (map & route)"])
 
@@ -33,6 +77,7 @@ with st.sidebar.form("search_form"):
         "Vertical", list_verticals(), format_func=lambda k: load_vertical(k).name
     )
     location = st.text_input("Location", placeholder="Denver, CO or 80202")
+    radius_miles = st.slider("Radius from location (miles)", 1, 35, 15)
     max_results = st.slider("Max results per business type", 5, 60, 20)
     fetch_emails = st.checkbox(
         "Look up emails (slower -- scrapes business websites)", value=True
@@ -110,6 +155,29 @@ if submitted:
             )
 
     df = pd.DataFrame(rows)
+
+    # --- Radius filter (Option 2: post-filter by distance from result center) ---
+    if not df.empty:
+        geo = df.dropna(subset=["lat", "lng"])
+        if not geo.empty:
+            center_lat = geo["lat"].mean()
+            center_lng = geo["lng"].mean()
+            df["distance_mi"] = df.apply(
+                lambda r: _haversine_miles(center_lat, center_lng, r["lat"], r["lng"])
+                if pd.notna(r["lat"]) and pd.notna(r["lng"]) else None,
+                axis=1,
+            )
+            before = len(df)
+            df = df[(df["distance_mi"].isna()) | (df["distance_mi"] <= radius_miles)]
+            dropped = before - len(df)
+            if dropped:
+                st.session_state["radius_note"] = (
+                    f"Radius filter: kept merchants within {radius_miles} mi of the "
+                    f"search center, dropped {dropped} outside it."
+                )
+            else:
+                st.session_state["radius_note"] = ""
+
     if not df.empty:
         df = df.sort_values("score", ascending=False).reset_index(drop=True)
     st.session_state["results"] = df
@@ -119,12 +187,16 @@ df = st.session_state.get("results")
 
 if df is not None and not df.empty:
     st.success(f"{len(df)} prospects found for {st.session_state.get('last_vertical', '')}")
+    radius_note = st.session_state.get("radius_note", "")
+    if radius_note:
+        st.caption(radius_note)
 
     if mode == "BDR / SDR (call list)":
         display_cols = [
-            "score", "name", "phone", "email", "address", "est_monthly_tpv",
+            "score", "name", "phone", "email", "address", "distance_mi", "est_monthly_tpv",
             "tpv_confidence", "best_angle", "explanation", "website",
         ]
+        display_cols = [c for c in display_cols if c in df.columns]
         st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
 
         selected_name = st.selectbox(
@@ -145,11 +217,8 @@ if df is not None and not df.empty:
         else:
             st.info("No coordinates available for these results.")
 
-        st.dataframe(
-            df[["score", "name", "address", "phone", "best_angle", "est_monthly_tpv"]],
-            use_container_width=True,
-            hide_index=True,
-        )
+        rep_cols = [c for c in ["score", "name", "address", "phone", "distance_mi", "best_angle", "est_monthly_tpv"] if c in df.columns]
+        st.dataframe(df[rep_cols], use_container_width=True, hide_index=True)
 
         kml = to_kml(df)
         st.download_button("Download route (KML for Google My Maps)", kml, file_name="route.kml")
